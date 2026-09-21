@@ -59,11 +59,10 @@ function main()
   M_0s = λs .- ϖs
   m_s_e24kg = 1.98911e6 # mass of the Sun (units: 10^24 kg)
   m_ps = [0.3302, 4.8685, 5.9736, 0.64185, 1898.6, 568.46, 86.832, 102.43, 0.0127] ./ m_s_e24kg
-  t_0 = 0.0
-  t_1 = 60.0
-  dt = 0.01
 
   planet_range = 6:8
+  t_0, t_1 = 0.0, 60.0
+  dt = 0.01
   println("Simulating the orbits of $(length(planet_range)) planets from $(2000 + t_0) to $(2000 + t_1) ($(convert(Int, (t_1 - t_0) / dt)) timesteps)...")
   orbits = Orbits{Float64}(as[planet_range], es[planet_range], ϖs[planet_range], M_0s[planet_range], m_ps[planet_range])
   ts, fs, rs, θs = sim(orbits, 1.0, t_0, t_1, dt)
@@ -80,9 +79,8 @@ function main()
     Plots.scatter!([orbits.ϖs[i]], [r_ps[i]], label = label_apsides ? "Perihelion" : "", markershape = :xcross, color =:green)
     Plots.scatter!([orbits.ϖs[i] + π], [r_as[i]], label = label_apsides ? "Aphelion" : "", markershape = :xcross, color = :red)
   end
-  peri_idxs = [argmin(abs.(rs[i, :] .- r_ps[i])) for i in eachindex(planet_range)]
   for i in eachindex(planet_range)
-    peri_idx = peri_idxs[i]
+    peri_idx = argmin(abs.(rs[i, :] .- r_ps[i]))
     t_peri, r_peri, θ_peri = ts[peri_idx], rs[i, peri_idx], θs[i, peri_idx]
     Plots.scatter!([θ_peri], [r_peri], label = "$(names[planet_range][i]) at $(2000 + t_peri)", markershape = :cross)
   end
@@ -93,7 +91,31 @@ function main()
     t_suc, r_suc, θ_suc = ts[suc_idx], rs[i, suc_idx], θs[i, suc_idx]
     Plots.scatter!([θ_suc], [r_suc], label = "$(names[planet_range][i]) at $(2000 + t_suc)", markershape = :star6)
   end
-  filename = "orbits.svg"
+  filename = "orbits1.svg"
+  Plots.savefig(filename)
+  println("Saved to $filename.")
+
+  planet_range = 8:9
+  t_0, t_1 = -20.0, 0.0
+  dt = 0.01
+  println("Simulating the orbits of $(length(planet_range)) planets from $(2000 + t_0) to $(2000 + t_1) ($(convert(Int, (t_1 - t_0) / dt)) timesteps)...")
+  orbits = Orbits{Float64}(as[planet_range], es[planet_range], ϖs[planet_range], M_0s[planet_range], m_ps[planet_range])
+  ts, fs, rs, θs = sim(orbits, 1.0, t_0, t_1, dt)
+  println("Done! Now, making pretty picture...")
+  Plots.plot(proj = :polar, title = "Orbits from $(2000 + t_0) to $(2000 + t_1) (r in AU)", legend = :topleft)
+  Plots.scatter!([0], [0], label = "Sun", markershape = :circle, color = :yellow)
+  for i in eachindex(planet_range)
+    Plots.plot!(θs[i, :], rs[i, :], label = names[planet_range][i])
+  end
+  neptune_idx = findfirst(==("Neptune"), names[planet_range])
+  pluto_idx = findfirst(==("Pluto"), names[planet_range])
+  rs_pluto = rs[pluto_idx, :]
+  r_p_n = orbits.as[neptune_idx] * (1 - orbits.es[neptune_idx])
+  first_idx, last_idx = findfirst(r -> r <= r_p_n, rs_pluto), findlast(r -> r <= r_p_n, rs_pluto)
+  for idx in [first_idx, last_idx]
+    Plots.scatter!([θs[pluto_idx, idx]], [rs_pluto[idx]], label = "Pluto at $(2000 + ts[idx]) (r < $r_p_n AU)")
+  end
+  filename = "orbits2.svg"
   Plots.savefig(filename)
   println("Saved to $filename.")
 end
