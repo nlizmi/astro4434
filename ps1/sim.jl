@@ -45,11 +45,6 @@ function sim(
   ts, fs, rs, θs
 end
 
-function nearest_encounter_idx(vec, val)
-  diff = abs.(vec .- val)
-  argmin(diff)
-end
-
 function main()
   names = ["Mercury", "Venus", "Earth", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune", "Pluto"]
   as = [0.38709893, 0.72333199, 1.00000011, 1.52366231, 5.20336301, 9.53707032, 19.19126393, 30.06896348, 39.48168677]
@@ -74,11 +69,8 @@ function main()
   end
   r_ps = orbits.as .* (1 .- orbits.es)
   r_as = orbits.as .* (1 .+ orbits.es)
-  for i in eachindex(planet_range)
-    label_apsides = i == 1
-    Plots.scatter!([orbits.ϖs[i]], [r_ps[i]], label = label_apsides ? "Perihelion" : "", markershape = :xcross, color =:green)
-    Plots.scatter!([orbits.ϖs[i] + π], [r_as[i]], label = label_apsides ? "Aphelion" : "", markershape = :xcross, color = :red)
-  end
+  Plots.scatter!(orbits.ϖs, r_ps, label = "Perihelion", markershape = :xcross, color =:green)
+  Plots.scatter!(orbits.ϖs .+ π, r_as, label = "Aphelion", markershape = :xcross, color = :red)
   for i in eachindex(planet_range)
     peri_idx = argmin(abs.(rs[i, :] .- r_ps[i]))
     t_peri, r_peri, θ_peri = ts[peri_idx], rs[i, peri_idx], θs[i, peri_idx]
@@ -96,7 +88,7 @@ function main()
   println("Saved to $filename.")
 
   planet_range = 8:9
-  t_0, t_1 = -20.0, 0.0
+  t_0, t_1 = -30.0, 10.0
   dt = 0.01
   println("Simulating the orbits of $(length(planet_range)) planets from $(2000 + t_0) to $(2000 + t_1) ($(convert(Int, (t_1 - t_0) / dt)) timesteps)...")
   orbits = Orbits{Float64}(as[planet_range], es[planet_range], ϖs[planet_range], M_0s[planet_range], m_ps[planet_range])
@@ -109,13 +101,35 @@ function main()
   end
   neptune_idx = findfirst(==("Neptune"), names[planet_range])
   pluto_idx = findfirst(==("Pluto"), names[planet_range])
-  rs_pluto = rs[pluto_idx, :]
-  r_p_n = orbits.as[neptune_idx] * (1 - orbits.es[neptune_idx])
-  first_idx, last_idx = findfirst(r -> r <= r_p_n, rs_pluto), findlast(r -> r <= r_p_n, rs_pluto)
+  within_neptune = rs[pluto_idx, :] .<= rs[neptune_idx, :]
+  first_idx, last_idx = findfirst(==(true), within_neptune), findlast(==(true), within_neptune)
   for idx in [first_idx, last_idx]
-    Plots.scatter!([θs[pluto_idx, idx]], [rs_pluto[idx]], label = "Pluto at $(2000 + ts[idx]) (r < $r_p_n AU)")
+    Plots.scatter!([θs[[neptune_idx, pluto_idx], idx]], [rs[[neptune_idx, pluto_idx], idx]], label = "$(2000 + ts[idx])", markershape = :cross)
   end
   filename = "orbits2.svg"
+  Plots.savefig(filename)
+  println("Saved to $filename.")
+
+  planet_range = 8:9
+  t_0, t_1 = -30.0 - 248, 10.0 - 248
+  dt = 0.01
+  println("Simulating the orbits of $(length(planet_range)) planets from $(2000 + t_0) to $(2000 + t_1) ($(convert(Int, (t_1 - t_0) / dt)) timesteps)...")
+  orbits = Orbits{Float64}(as[planet_range], es[planet_range], ϖs[planet_range], M_0s[planet_range], m_ps[planet_range])
+  ts, fs, rs, θs = sim(orbits, 1.0, t_0, t_1, dt)
+  println("Done! Now, making pretty picture...")
+  Plots.plot(proj = :polar, title = "Orbits from $(2000 + t_0) to $(2000 + t_1) (r in AU)", legend = :topleft)
+  Plots.scatter!([0], [0], label = "Sun", markershape = :circle, color = :yellow)
+  for i in eachindex(planet_range)
+    Plots.plot!(θs[i, :], rs[i, :], label = names[planet_range][i])
+  end
+  neptune_idx = findfirst(==("Neptune"), names[planet_range])
+  pluto_idx = findfirst(==("Pluto"), names[planet_range])
+  within_neptune = rs[pluto_idx, :] .<= rs[neptune_idx, :]
+  first_idx, last_idx = findfirst(==(true), within_neptune), findlast(==(true), within_neptune)
+  for idx in [first_idx, last_idx]
+    Plots.scatter!([θs[[neptune_idx, pluto_idx], idx]], [rs[[neptune_idx, pluto_idx], idx]], label = "$(2000 + ts[idx])", markershape = :cross)
+  end
+  filename = "orbits3.svg"
   Plots.savefig(filename)
   println("Saved to $filename.")
 end
