@@ -68,7 +68,7 @@ function main()
   orbits = Orbits{Float64}(as[planet_range], es[planet_range], ϖs[planet_range], M_0s[planet_range], m_ps[planet_range])
   ts, fs, rs, θs = sim(orbits, 1.0, t_0, t_1, dt)
   println("Done! Now, making pretty picture...")
-  Plots.plot(proj = :polar, title = "Orbits from $(2000 + t_0) to $(2000 + t_1) (r in AU)")
+  Plots.plot(proj = :polar, title = "Orbits from $(2000 + t_0) to $(2000 + t_1) (r in AU)", legend = :topleft)
   Plots.scatter!([0], [0], label = "Sun", markershape = :circle, color = :yellow)
   for i in eachindex(planet_range)
     Plots.plot!(θs[i, :], rs[i, :], label = names[planet_range][i])
@@ -77,14 +77,22 @@ function main()
   r_as = orbits.as .* (1 .+ orbits.es)
   for i in eachindex(planet_range)
     label_apsides = i == 1
-    Plots.scatter!([orbits.ϖs[i]], [r_ps[i]], label = label_apsides ? "Perihelion" : "", markershape = :diamond, color =:green)
-    Plots.scatter!([orbits.ϖs[i] + π], [r_as[i]], label = label_apsides ? "Aphelion" : "", markershape = :diamond, color = :red)
+    Plots.scatter!([orbits.ϖs[i]], [r_ps[i]], label = label_apsides ? "Perihelion" : "", markershape = :xcross, color =:green)
+    Plots.scatter!([orbits.ϖs[i] + π], [r_as[i]], label = label_apsides ? "Aphelion" : "", markershape = :xcross, color = :red)
   end
   peri_idxs = [argmin(abs.(rs[i, :] .- r_ps[i])) for i in eachindex(planet_range)]
+  for i in eachindex(planet_range)
+    peri_idx = peri_idxs[i]
+    t_peri, r_peri, θ_peri = ts[peri_idx], rs[i, peri_idx], θs[i, peri_idx]
+    Plots.scatter!([θ_peri], [r_peri], label = "$(names[planet_range][i]) at $(2000 + t_peri)", markershape = :cross)
+  end
   saturn_idx = findfirst(==("Saturn"), names[planet_range])
   uranus_idx = findfirst(==("Uranus"), names[planet_range])
-  s_u_conjunct_idx = argmin(abs.(θs[saturn_idx, :] .- θs[uranus_idx, :]))
-  ts_peri, rs_peri, θs_peri = ts[peri_idxs], rs[peri_idxs], θs[peri_idxs]
+  suc_idx = argmin(abs.(θs[saturn_idx, :] .- θs[uranus_idx, :]))
+  for i in [saturn_idx, uranus_idx]
+    t_suc, r_suc, θ_suc = ts[suc_idx], rs[i, suc_idx], θs[i, suc_idx]
+    Plots.scatter!([θ_suc], [r_suc], label = "$(names[planet_range][i]) at $(2000 + t_suc)", markershape = :star6)
+  end
   filename = "orbits.svg"
   Plots.savefig(filename)
   println("Saved to $filename.")
