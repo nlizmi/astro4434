@@ -70,24 +70,24 @@ function main()
   println("Done! Now, making pretty picture...")
   Plots.plot(proj = :polar, title = "Orbits from $(2000 + t_0) to $(2000 + t_1) (r in AU)")
   Plots.scatter!([0], [0], label = "Sun", markershape = :circle, color = :yellow)
-  for i in 1:length(planet_range)
+  for i in eachindex(planet_range)
     Plots.plot!(θs[i, :], rs[i, :], label = names[planet_range][i])
   end
   r_ps = orbits.as .* (1 .- orbits.es)
   r_as = orbits.as .* (1 .+ orbits.es)
-  for i in 1:length(planet_range)
+  for i in eachindex(planet_range)
     label_apsides = i == 1
     Plots.scatter!([orbits.ϖs[i]], [r_ps[i]], label = label_apsides ? "Perihelion" : "", markershape = :diamond, color =:green)
     Plots.scatter!([orbits.ϖs[i] + π], [r_as[i]], label = label_apsides ? "Aphelion" : "", markershape = :diamond, color = :red)
   end
+  peri_idxs = [argmin(abs.(rs[i, :] .- r_ps[i])) for i in eachindex(planet_range)]
+  saturn_idx = findfirst(==("Saturn"), names[planet_range])
+  uranus_idx = findfirst(==("Uranus"), names[planet_range])
+  s_u_conjunct_idx = argmin(abs.(θs[saturn_idx, :] .- θs[uranus_idx, :]))
+  ts_peri, rs_peri, θs_peri = ts[peri_idxs], rs[peri_idxs], θs[peri_idxs]
   filename = "orbits.svg"
   Plots.savefig(filename)
   println("Saved to $filename.")
-
-  perihelion_dates = [ts[argmin(abs.(rs[i, :] .- r_ps[i]))] for i in 1:length(planet_range)]
-  saturn_uranus_conjunction = ts[argmin(abs.(rs[1, :] .- rs[3, :]))]
-  println("Closest approaches to the Sun for each planet are respectively on the dates $(2000 .+ perihelion_dates).")
-  println("Saturn–Uranus conjunction occurs on the date $(2000 + saturn_uranus_conjunction).")
 end
 
 main()
