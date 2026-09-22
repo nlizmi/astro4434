@@ -59,7 +59,6 @@ function base_plot(
   print("Making pretty picture...")
   flush(stdout)
   Plots.plot(proj = :polar, title = "Orbits from $(2000 + t_0) to $(2000 + t_1) (r in AU)", legend = :topleft)
-  Plots.scatter!([0], [0], label = "Sun", markershape = :circle, color = :yellow)
   Plots.plot!(transpose(results.θs), transpose(results.rs), label = permutedims(orbits.names))
 end
 
