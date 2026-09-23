@@ -36,10 +36,9 @@ function sim(
     Roots.find_zero((kepler, ddE_kepler), M, Roots.Newton()) # eccentric anomaly (rad)
   end
 
-  n_steps = convert(Int, (t_1 - t_0) / dt)
-  print("Simulating $(length(orbits)) planets from $(2000+t_0) to $(2000+t_1) ($n_steps timesteps)...")
-  flush(stdout)
   ts = collect(t_0:dt:t_1) # array of times (yr)
+  print("Simulating $(length(orbits)) planets from $(2000+t_0) to $(2000+t_1) ($(length(ts)) timesteps)...")
+  flush(stdout)
   ns = 2π .* sqrt.((orbits.m_ps .+ m_s) ./ orbits.as .^ 3) # mean motion (rad / yr)
   Ms = orbits.M_0s .+ ns .* transpose(ts) # mean anomaly (rad)
   Es = eccentric_anomaly.(Ms, orbits.es) # (rad)
