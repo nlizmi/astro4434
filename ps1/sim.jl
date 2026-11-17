@@ -132,34 +132,42 @@ function main()
 
   dt = 0.001
 
-  orbits = all_orbits[6:8]
-  t_0, t_1 = 0.0, 60.0
-  results = sim(orbits, m_s, t_0, t_1, dt)
-  base_plot(orbits, results, t_0, t_1)
-  r_ps, _ = mark_apsides!(orbits)
-  mark_perihelion_passages!(orbits, results, r_ps)
-  mark_conjunction!(orbits, results, "Saturn", "Uranus")
-  save_plot("orbits1.svg")
+  # orbits = all_orbits[6:8]
+  # t_0, t_1 = 0.0, 60.0
+  # results = sim(orbits, m_s, t_0, t_1, dt)
+  # base_plot(orbits, results, t_0, t_1)
+  # r_ps, _ = mark_apsides!(orbits)
+  # mark_perihelion_passages!(orbits, results, r_ps)
+  # mark_conjunction!(orbits, results, "Saturn", "Uranus")
+  # save_plot("orbits1.svg")
 
-  orbits = all_orbits[8:9]
-  t_0, t_1 = -30.0, 10.0
-  results = sim(orbits, m_s, t_0, t_1, dt)
-  base_plot(orbits, results, t_0, t_1)
-  mark_orbit_crossings!(orbits, results, "Neptune", "Pluto")
-  save_plot("orbits2.svg")
+  # orbits = all_orbits[8:9]
+  # t_0, t_1 = -30.0, 10.0
+  # results = sim(orbits, m_s, t_0, t_1, dt)
+  # base_plot(orbits, results, t_0, t_1)
+  # mark_orbit_crossings!(orbits, results, "Neptune", "Pluto")
+  # save_plot("orbits2.svg")
 
-  t_0, t_1 = (-30.0, 10.0) .- 248
-  results = sim(orbits, m_s, t_0, t_1, dt)
-  base_plot(orbits, results, t_0, t_1)
-  mark_orbit_crossings!(orbits, results, "Neptune", "Pluto")
-  save_plot("orbits3.svg")
+  # t_0, t_1 = (-30.0, 10.0) .- 248
+  # results = sim(orbits, m_s, t_0, t_1, dt)
+  # base_plot(orbits, results, t_0, t_1)
+  # mark_orbit_crossings!(orbits, results, "Neptune", "Pluto")
+  # save_plot("orbits3.svg")
 
-  orbits = all_orbits
-  dt = 0.01
-  t_0, t_1 = 0.0, 250.0
-  results = sim(orbits, m_s, t_0, t_1, dt)
-  base_plot(orbits, results, t_0, t_1)
-  save_plot("orbits4.svg")
+  # orbits = all_orbits
+  # dt = 0.01
+  # t_0, t_1 = 0.0, 250.0
+  # results = sim(orbits, m_s, t_0, t_1, dt)
+  # base_plot(orbits, results, t_0, t_1)
+  # save_plot("orbits4.svg")
+
+  dt = 0.001
+  t_0 = 4.91307
+  t_1 = t_0 + dt
+  results = sim(all_orbits, m_s, t_0, t_1, dt)
+  print(rad2deg.(results.θs))
+  base_plot(all_orbits, results, t_0, t_1)
+  save_plot("bq-bday.svg")
 end
 
 main()

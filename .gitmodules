@@ -1,0 +1,3 @@
+[submodule "final/ExPRES"]
+	path = final/ExPRES
+	url = git@github.com:maserlib/ExPRES.git

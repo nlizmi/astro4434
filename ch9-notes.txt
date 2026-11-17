@@ -1,0 +1,10 @@
+Basically three methods for figuring out the shapes of asteroids: direct imaging (adaptive optics/Hubble/JWST?), lightcurve analysis, and radar data
+
+Shape from lightcurves:
+  Use data from many viewing angles over a long span of time, collecting amount of light reflected off surface -> solve an inverse problem of what the shape and rotation of the asteroid must be to produce those curves. Seems like a difficult problem! lots of non-uniqueness (see figure that looks like convex hull)? or are there enough constraints.
+  Also interesting: lightcurves show that (lightcurve amplitude ~ elongation) looks like this:
+
+    (kuiper belt) < (asteroid belt, NEOs) < (Trojans)
+
+Shape from radar data:
+  For Near-Earth Objects that come close, we can use radar reflections to infer the shape since they are often very radar-bright. Many of them are very elongated and may be contact binaries ("fused gently"). Interesting: Toutatis, which "tumbles" by spinning with two different motions that have different periods.
